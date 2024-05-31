@@ -1,0 +1,25 @@
+# keep
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          fake-google:
+            client-id: google-client
+            client-secret: google-secret
+            client-name: "Login with fake Google (use user@google.com / password)"
+            scope:
+              - openid
+              - email
+          fake-azure:
+            client-id: azure-client
+            client-secret: azure-secret
+            client-name: "Login with fake Azure (use user@microsoft.com / password)"
+            scope:
+              - openid
+              - email
+        provider:
+          fake-google:
+            issuer-uri: http://localhost:1111
+          fake-azure:
+            issuer-uri: http://localhost:2222

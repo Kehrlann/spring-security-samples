@@ -1,0 +1,41 @@
+services:
+  google:
+    image: "bitnami/dex:2.37.0"
+    deploy:
+      replicas: 1
+    configs:
+      - source: google_config
+        target: /opt/config/dex-google.yml
+    ports:
+      - 1111:1111
+    command:
+      - serve
+      - /opt/config/dex-google.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1111/.well-known/openid-configuration"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+  azure:
+    image: "bitnami/dex:2.37.0"
+    deploy:
+      replicas: 1
+    configs:
+      - source: azure_config
+        target: /opt/config/dex-azure.yml
+    ports:
+      - 2222:2222
+    command:
+      - serve
+      - /opt/config/dex-azure.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2222/.well-known/openid-configuration"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+
+configs:
+  google_config:
+    file: dex-google.yml
+  azure_config:
+    file: dex-azure.yml

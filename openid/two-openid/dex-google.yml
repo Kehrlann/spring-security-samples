@@ -1,0 +1,22 @@
+issuer: "http://localhost:1111"
+storage:
+  type: sqlite3
+  config:
+    file: /opt/dex.db
+web:
+  http: 0.0.0.0:1111
+staticClients:
+  - id: google-client
+    redirectURIs:
+      - "http://localhost:8080/login/oauth2/code/fake-google"
+    name: 'Base application'
+    secret: google-secret
+    grant_types:
+      - authorization_code
+      - client_credentials
+enablePasswordDB: true
+staticPasswords:
+  - email: "user@google.com"
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: "google-user"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"

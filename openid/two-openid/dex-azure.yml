@@ -1,0 +1,22 @@
+issuer: "http://localhost:2222"
+storage:
+  type: sqlite3
+  config:
+    file: /opt/dex.db
+web:
+  http: 0.0.0.0:2222
+staticClients:
+  - id: azure-client
+    redirectURIs:
+      - "http://localhost:8080/login/oauth2/code/fake-azure"
+    name: 'Base application'
+    secret: azure-secret
+    grant_types:
+      - authorization_code
+      - client_credentials
+enablePasswordDB: true
+staticPasswords:
+  - email: "user@microsoft.com"
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: "azure"
+    userID: "b6f6b08e-1491-4b44-8ed9-762dd5f2b6f6"
