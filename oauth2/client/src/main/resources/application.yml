@@ -1,0 +1,37 @@
+spring:
+  thymeleaf:
+    cache: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          okta:
+            client-id: "<CHANGE-ME>"
+            client-secret: "<CHANGE-ME>"
+            client-name: Okta
+            scope:
+              - openid
+              - email
+              - profile
+              - conference.list
+          spring-auth-server:
+            client-id: "oidc-client"
+            client-secret: "secret"
+            client-name: Spring Authorization Server
+            scope:
+              - openid
+              - email
+              - conference.list
+          google:
+            client-id: "<CHANGE-ME>"
+            client-secret: "<CHANGE-ME>"
+        provider:
+          okta:
+            issuer-uri: "<CHANGE-ME>"
+          spring-auth-server:
+            issuer-uri: "http://localhost:8083"
+server:
+  servlet:
+    session:
+      persistent: true

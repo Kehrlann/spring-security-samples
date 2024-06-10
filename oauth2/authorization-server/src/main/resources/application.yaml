@@ -1,0 +1,35 @@
+server:
+  port: 8083
+  servlet:
+    session:
+      cookie:
+        name: AUTHSERVER_SESSION
+spring:
+  security:
+    user:
+      name: okta@garnier.wf
+      password: password
+    oauth2:
+      authorizationserver:
+        client:
+          local:
+            registration:
+              client-id: "oidc-client"
+              client-secret: "{noop}secret"
+              client-authentication-methods:
+                - "client_secret_basic"
+              authorization-grant-types:
+                - "authorization_code"
+              redirect-uris:
+                - "http://localhost:8080/login/oauth2/code/spring-auth-server"
+                - "http://localhost:8080/authorize/oauth2/code/spring-auth-server"
+              scopes:
+                - "openid"
+                - "email"
+                - "profile"
+                - "conference.list"
+                - "conference.admin"
+            require-authorization-consent: false
+logging:
+  level:
+    org.springframework.security: TRACE
