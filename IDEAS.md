@@ -1,0 +1,2 @@
+- [ ] Authentication order: https://hachyderm.io/@niels@basjes.nl/112602733818059324
+- [ ] mTLS with RestClient (RestTemplate)
