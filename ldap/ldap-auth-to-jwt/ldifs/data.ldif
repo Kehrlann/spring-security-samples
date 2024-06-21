@@ -1,0 +1,22 @@
+# Root creation
+dn: dc=example,dc=org
+objectClass: dcObject
+objectClass: organization
+dc: example
+o: example
+
+dn: ou=Users,dc=example,dc=org
+objectClass: organizationalUnit
+ou: users
+
+dn: cn=user,ou=Users,dc=example,dc=org
+cn: user
+sn: Jane Doe
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+userPassword: password
+uid: user
+uidNumber: 1000
+gidNumber: 1000
+homeDirectory: /home/user

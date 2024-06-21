@@ -1,0 +1,23 @@
+services:
+  ldap:
+    image: bitnami/openldap:latest
+    ports:
+      - 1389:1389
+    environment:
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: password
+      LDAP_ROOT: "dc=example,dc=org"
+      LDAP_SKIP_DEFAULT_TREE: "yes"
+      LDAP_CUSTOM_LDIF_DIR: "/ldifs"
+
+    volumes:
+      - ./ldifs:/ldifs
+
+#    docker run --rm --name openldap \
+#    --env LDAP_ADMIN_USERNAME=admin \
+#    --env LDAP_ADMIN_PASSWORD=adminpassword \
+#    --env LDAP_ROOT="dc=example,dc=org" \
+#    --publish 1389:1389 \
+#    --volume "$PWD/ldifs:/ldifs" \
+#    bitnami/openldap:latest
+
