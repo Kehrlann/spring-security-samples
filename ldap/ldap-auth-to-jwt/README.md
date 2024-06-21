@@ -16,6 +16,10 @@ Notes:
 - The project uses an OpenLDAP docker container, with a custom LDIF
 - It uses bind authentication with an admin account (admin/password)
 - It does not populate authorities for the user logging in, it is left as a exercise for the reader.
+- While this may have use-cases, it is probably more reasonable to delegate your authentication to
+  an OpenID Connect Provider / OAuth2 Auth Server. That, in turn, could defer to LDAP to manage
+  identity and authentication. You could use Keycloak or build an experience using Spring
+  Authorization Server
 
 
 Interesting docs:
