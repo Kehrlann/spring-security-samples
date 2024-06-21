@@ -37,7 +37,7 @@ openssl pkcs12 -export -out clientBob.p12 -name "clientBob" -inkey clientBob.key
 NB: All certificates and stores were generated with `changeit` as the key or secret, and are
 intended to work on `http://localhost:...`
 
-Navigate to http://localhost:8080/ . You can log in with `Bob` (capital B!!) and pw: `password` ;
+Navigate to http://localhost:8080/ . You can log in with `bob` and pw: `password` ;
 you should be able to navigate to http://localhost:8080/formlogin but NOT to
 http://localhost:8080/x509 .
 

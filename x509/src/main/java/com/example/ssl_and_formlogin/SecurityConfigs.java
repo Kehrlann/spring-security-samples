@@ -61,7 +61,7 @@ class SecurityConfigs {
         SecurityFilterChain formLoginFilterChain(HttpSecurity http) throws Exception {
             return http
                     // You can comment the security matcher and make this the default chain
-                    .securityMatcher("/formlogin/**")
+                    .securityMatcher("/formlogin/**", "/login/**")
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                     .formLogin(Customizer.withDefaults())
                     .build();
