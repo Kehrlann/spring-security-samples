@@ -76,7 +76,6 @@ class SecurityConfigs {
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                     .x509(Customizer.withDefaults())
                     .httpBasic(Customizer.withDefaults())
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .build();
         }
 
