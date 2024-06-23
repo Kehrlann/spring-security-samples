@@ -1,7 +1,12 @@
 package com.example.ssl_and_formlogin;
 
+import java.io.IOException;
 import java.util.Collection;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -9,6 +14,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,6 +30,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 
 class SecurityConfigs {
@@ -75,10 +83,20 @@ class SecurityConfigs {
             return http.securityMatcher("/basic/**")
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                     .x509(Customizer.withDefaults())
-                    .httpBasic(Customizer.withDefaults())
-                    .build();
-        }
+                    .httpBasic(basic -> {
+                        basic.addObjectPostProcessor(
+                                new ObjectPostProcessor<BasicAuthenticationFilter>() {
+                                    @Override
+                                    public <O extends BasicAuthenticationFilter> O postProcess(O filter) {
+                                        return (O) new BackingOffBasicAuthenticationFilter(filter);
+                                    }
+                                }
+                        );
+                    })
+                            .
 
+                    build();
+        }
 
         @Bean
         public UserDetailsService userDetailsService() {
@@ -90,6 +108,32 @@ class SecurityConfigs {
                             .password("{noop}password")
                             .build()
             );
+        }
+
+        /**
+         * A backing-off implementation of {@link BasicAuthenticationFilter}, which piggy-backs on top of a
+         * pre-configured filter. This implementation backs off if there already is an authentication in the
+         * Security Context.
+         * <p>
+         * This needs to be a {@link BasicAuthenticationFilter} because we use the basic configurer which does
+         * some casting on the filter. And the parent class needs an authentication-manager in the constructor,
+         * even if we do not use it, hence the {@code auth -> null} lambda.
+         */
+        static class BackingOffBasicAuthenticationFilter extends BasicAuthenticationFilter {
+            private final BasicAuthenticationFilter delegate;
+
+            public BackingOffBasicAuthenticationFilter(BasicAuthenticationFilter delegate) {
+                super(authentication -> null);
+                this.delegate = delegate;
+            }
+
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+                if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                    filterChain.doFilter(request, response);
+                }
+                delegate.doFilter(request, response, filterChain);
+            }
         }
 
         // TODO: oauth2?

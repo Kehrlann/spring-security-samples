@@ -52,3 +52,12 @@ Note:
 
 - `--cacert` is so that curl trusts the Spring Boot App
 - `--cert clientBob.p12:changeit --cert-type P12` is so that curl sends the client certificate when making requests
+
+## Some notes on ordering
+
+- HTTP basic takes precedence over other auth mechanisms
+- x509 backs off by default when the request is already authenticated
+  - Unless `AbstractPreAuthenticationFilter#setCheckForPrincipalChanges` is set to true
+- So ordering is, by default: HTTP Basic, Session-based auth (e.g. form login), x509 as a last resort
+- In the /basic endpoint, we showcase how to make a "backing-off" BasicAuthenticationFilter, which
+  does not apply its auth logic if there already is an authentication in the SecurityContext
