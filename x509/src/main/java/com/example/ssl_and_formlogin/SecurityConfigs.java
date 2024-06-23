@@ -16,8 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
@@ -65,6 +67,30 @@ class SecurityConfigs {
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                     .formLogin(Customizer.withDefaults())
                     .build();
+        }
+
+        @Bean
+        @Order(3)
+        SecurityFilterChain httpBasicChain(HttpSecurity http) throws Exception {
+            return http.securityMatcher("/basic/**")
+                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                    .x509(Customizer.withDefaults())
+                    .httpBasic(Customizer.withDefaults())
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .build();
+        }
+
+
+        @Bean
+        public UserDetailsService userDetailsService() {
+            return new InMemoryUserDetailsManager(
+                    User.withUsername("alice")
+                            .password("{noop}password")
+                            .build(),
+                    User.withUsername("bob")
+                            .password("{noop}password")
+                            .build()
+            );
         }
 
         // TODO: oauth2?
@@ -122,6 +148,18 @@ class SecurityConfigs {
             public CustomX509Authentication(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
                 super(principal, credentials, AuthorityUtils.createAuthorityList("ROLE_x509"));
             }
+        }
+
+        @Bean
+        public UserDetailsService userDetailsService() {
+            return new InMemoryUserDetailsManager(
+                    User.withUsername("alice")
+                            .password("{noop}password")
+                            .build(),
+                    User.withUsername("bob")
+                            .password("{noop}password")
+                            .build()
+            );
         }
     }
 

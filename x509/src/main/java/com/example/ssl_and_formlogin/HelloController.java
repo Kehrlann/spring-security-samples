@@ -25,4 +25,9 @@ class HelloController {
     public String formLogin() {
         return "Hello from formlogin";
     }
+
+    @GetMapping("/basic")
+    public String basic(Authentication authentication) {
+        return "Hello %s (%s)".formatted(authentication.getName(), authentication.getClass().getSimpleName());
+    }
 }
