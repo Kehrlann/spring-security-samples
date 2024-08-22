@@ -14,32 +14,35 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
 
-    @Override
-    public String resolveCurrentTenantIdentifier() {
-        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
-                .filter(ServletRequestAttributes.class::isInstance)
-                .map(ServletRequestAttributes.class::cast)
-                .map(ServletRequestAttributes::getRequest)
-                .map(HttpServletRequest.class::cast)
-                .map(HttpServletRequest::getServerName)
-                .map(s -> s.split("\\.")[0])
-                .orElse("red");
-    }
+	@Override
+	public String resolveCurrentTenantIdentifier() {
+		// Can't get @RequestScope to work, because at init time, this is called outside
+		// of a request scope.
+		return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+			.filter(ServletRequestAttributes.class::isInstance)
+			.map(ServletRequestAttributes.class::cast)
+			.map(ServletRequestAttributes::getRequest)
+			.map(HttpServletRequest.class::cast)
+			.map(HttpServletRequest::getServerName)
+			.map(s -> s.split("\\.")[0])
+			.orElse("red");
+	}
 
-    @Override
-    public boolean validateExistingCurrentSessions() {
-        return false;
-    }
+	@Override
+	public boolean validateExistingCurrentSessions() {
+		return false;
+	}
 
-    @Override
-    public boolean isRoot(Object tenantId) {
-        return CurrentTenantIdentifierResolver.super.isRoot(tenantId);
-    }
+	@Override
+	public boolean isRoot(Object tenantId) {
+		return CurrentTenantIdentifierResolver.super.isRoot(tenantId);
+	}
 
-    @Override
-    public void customize(Map<String, Object> hibernateProperties) {
-        hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
-    }
+	@Override
+	public void customize(Map<String, Object> hibernateProperties) {
+		hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
+	}
 
-    // empty overrides skipped for brevity
+	// empty overrides skipped for brevity
+
 }

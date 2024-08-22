@@ -9,10 +9,20 @@ spring:
       name: user
       password: password
 
-
 server:
-  servlet:
-    session:
-      persistent: true
   port: 8080
   address: 127.0.0.1
+
+  # You should probably NOT be using the configuration below.
+  #
+  # This makes the user's session cookie available across all domains,
+  # meaning you can log in on red.127.0.0.1.nip.io as red-user,
+  # and THEN navigate to black.127.0.0.1.nip.io as black-user and be logged in.
+  #
+  # If you do not set the domain, the session cookie will be restricted to the
+  # subdomain your user logged in with, effectively separating sessions across sites.
+  #
+  # servlet:
+  #   session:
+  #     cookie:
+  #       domain: 127.0.0.1.nip.io
