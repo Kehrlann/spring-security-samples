@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: multitenant
+  sql:
+    init:
+      mode: always
+  security:
+    user:
+      name: user
+      password: password
+
+
+server:
+  servlet:
+    session:
+      persistent: true
+  port: 8080
+  address: 127.0.0.1
