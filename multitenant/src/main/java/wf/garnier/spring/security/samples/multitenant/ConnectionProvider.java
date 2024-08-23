@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomi
 import org.springframework.stereotype.Component;
 
 @Component
-class ExampleConnectionProvider implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {
+class ConnectionProvider implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {
 
 	@Autowired
 	DataSource dataSource;
