@@ -113,4 +113,47 @@ curl http://black.127.0.0.1.nip.io:8080/todo --user red-user:password -I
 
 ### Security through cookie domains
 
-TODO
+If a `red-user` logs in, using their browser, into `http://red.127.0.0.1.nip.io/todo`, and then they try to
+navigate to `http://black.127.0.0.1.nip.io/todo`, they will be presented with another login screen. This is
+because the cookie holding their session, `JSESSIONID`, is set to be valid on the host on which they first
+logged in (`red.`). So the browser does not send their session cookie when they visit another host (`black.`)
+
+If you change the setting of your cookies to be valid on any subdomain of `127.0.0.1.nip.io`, by setting in
+your properties:
+
+```yaml
+# You SHOULD NOT be doing this, unless you have a very good reason 
+server:
+  servlet:
+    session:
+      cookie:
+        domain: 127.0.0.1.nip.io
+```
+
+Then the cookie is valid across domain, and `red-user` will be able to go to `black.127.0.0.1.nip.io`, woops.
+
+### Security breach, or "The cookie crumbles"
+
+However, this is _browser_ restriction, that is used to protect the end-user from malicious websites, and not
+protect the server from malicious users!
+
+So, if you grab the `red-user`'s JSESSIONID cookie, conveniently displayed on `http://red.127.0.0.1.nip.io/todo`,
+and then use it with cURL:
+
+```
+curl  http://black.127.0.0.1.nip.io:8080/todo -H "Cookie: JSESSIONID=<your session id goes here>"        
+
+# Response:
+# 
+# <h1>Todo list</h1>
+# <p>Current domain: <strong>black.127.0.0.1.nip.io</strong></p>
+# <p>Logged in as: <strong>red-user</strong></p>
+# <p>Session ID: <strong>A2FDAF959EE28921DE9031086EA5D3D1</strong></p>
+# <ul>
+#     <li>black one</li>
+# <li>black two</li>
+# </ul>
+# <p><a href="/">Go to index</a></p>
+# <br><br>
+# <p><em>PSA: don't display sensitive credentials, like the session ID, on your webpage.</em></p>
+```

@@ -27,11 +27,14 @@ class TodoController {
 				<h1>Todo list</h1>
 				<p>Current domain: <strong>%s</strong></p>
 				<p>Logged in as: <strong>%s</strong></p>
+				<p>Session ID: <strong>%s</strong></p>
 				<ul>
 				    %s
 				</ul>
 				<p><a href="/">Go to index</a></p>
-				""".formatted(request.getServerName(), user.getUsername(), todos);
+				<br><br>
+				<p><em>PSA: don't display sensitive credentials, like the session ID, on your webpage.</em></p>
+				""".formatted(request.getServerName(), user.getUsername(), request.getSession().getId(), todos);
 	}
 
 }
