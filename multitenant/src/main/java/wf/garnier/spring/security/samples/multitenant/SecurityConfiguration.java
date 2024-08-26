@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import wf.garnier.spring.security.samples.multitenant.authentication.User;
 
@@ -29,8 +30,8 @@ class SecurityConfiguration {
 			.formLogin(Customizer.withDefaults())
 			.httpBasic(Customizer.withDefaults())
 			.logout(logout -> logout.logoutSuccessUrl("/"))
+			.addFilterBefore(new TenantVerificationFilter(false), AuthorizationFilter.class)
 			.build();
-
 	}
 
 	private static class TenantIdAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
