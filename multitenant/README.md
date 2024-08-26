@@ -3,15 +3,15 @@
 This sample showcases a basic multi-tenant application, using Postgres as a backing database, with one
 schema per tenant.
 
-Each tenant is decided by the subdomain of the incoming request, either `red.` or `black.` . In order
+Each tenant is decided by the subdomain of the incoming request, either `red.` or `blue.` . In order
 to have those subdomains locally, we use [nip.io](https://nip.io/) to point to localhost. To access
 the app, navigate to either:
 
 - http://127.0.0.1.nip.io:8080 (no tenant defined)
 - http://red.127.0.0.1.nip.io:8080 (red tenant)
-- http://black.127.0.0.1.nip.io:8080 (black tenant)
+- http://blue.127.0.0.1.nip.io:8080 (blue tenant)
 
-On the red tenant, there's a `red-user`, and on the black tenant, a `black-user`. Both use the `password`
+On the red tenant, there's a `red-user`, and on the blue tenant, a `blue-user`. Both use the `password`
 password.
 
 In both tenants, there is a `/todo` endpoint, that has no specific security, and a `/secured/todo` that
@@ -82,7 +82,7 @@ There are two ways to authenticate with the application:
 
 ### Security through data separation
 
-Basic security is in place just by having separate schemas, so that you cannot log in on `red.` with `black-user`.
+Basic security is in place just by having separate schemas, so that you cannot log in on `red.` with `blue-user`.
 The same would apply with separate databases. Let's verify this with basic cURL calls.
 
 An anonymous call to `/todo` fails:
@@ -113,11 +113,11 @@ curl http://red.127.0.0.1.nip.io:8080/todo --user red-user:password
 # <p><a href="/">Go to index</a></p>
 ```
 
-However, the `red-user` cannot talk to the `black.` tenant, because, when we verify the user,
-it targets the `black` schema, where there is no `red` user!
+However, the `red-user` cannot talk to the `blue.` tenant, because, when we verify the user,
+it targets the `blue` schema, where there is no `red` user!
 
 ```
-curl http://black.127.0.0.1.nip.io:8080/todo --user red-user:password -I
+curl http://blue.127.0.0.1.nip.io:8080/todo --user red-user:password -I
 
 # Response:
 #
@@ -128,9 +128,9 @@ curl http://black.127.0.0.1.nip.io:8080/todo --user red-user:password -I
 ### Security through cookie domains
 
 If a `red-user` logs in, using their browser, into `http://red.127.0.0.1.nip.io/todo`, and then they try to
-navigate to `http://black.127.0.0.1.nip.io/todo`, they will be presented with another login screen. This is
+navigate to `http://blue.127.0.0.1.nip.io/todo`, they will be presented with another login screen. This is
 because the cookie holding their session, `JSESSIONID`, is set to be valid on the host on which they first
-logged in (`red.`). So the browser does not send their session cookie when they visit another host (`black.`)
+logged in (`red.`). So the browser does not send their session cookie when they visit another host (`blue.`)
 
 If you change the setting of your cookies to be valid on any subdomain of `127.0.0.1.nip.io`, by setting in
 your properties:
@@ -144,7 +144,7 @@ server:
         domain: 127.0.0.1.nip.io
 ```
 
-Then the cookie is valid across domain, and `red-user` will be able to go to `black.127.0.0.1.nip.io`, woops.
+Then the cookie is valid across domain, and `red-user` will be able to go to `blue.127.0.0.1.nip.io`, woops.
 
 ### Security breach, or "The cookie crumbles"
 
@@ -155,17 +155,17 @@ So, if you grab the `red-user`'s JSESSIONID cookie, conveniently displayed on `h
 and then use it with cURL:
 
 ```
-curl  http://black.127.0.0.1.nip.io:8080/todo -H "Cookie: JSESSIONID=<your session id goes here>"        
+curl  http://blue.127.0.0.1.nip.io:8080/todo -H "Cookie: JSESSIONID=<your session id goes here>"        
 
 # Response:
 # 
 # <h1>Todo list</h1>
-# <p>Current domain: <strong>black.127.0.0.1.nip.io</strong></p>
+# <p>Current domain: <strong>blue.127.0.0.1.nip.io</strong></p>
 # <p>Logged in as: <strong>red-user</strong></p>
 # <p>Session ID: <strong>A2FDAF959EE28921DE9031086EA5D3D1</strong></p>
 # <ul>
-#     <li>black one</li>
-# <li>black two</li>
+#     <li>blue one</li>
+# <li>blue two</li>
 # </ul>
 # <p><a href="/">Go to index</a></p>
 # <br><br>
@@ -178,7 +178,7 @@ Users can "escape" their domain, by using a legitimate cookie. That's pretty bad
 
 ### Using an `AuthorizationManager`
 
-We want to block `red-user` to access the `black.` tenant, and vice-versa. If our app does not have to handle too many
+We want to block `red-user` to access the `blue.` tenant, and vice-versa. If our app does not have to handle too many
 permissions per-tenant (e.g. admin role, user role, etc), the we can write an `AuthorizationManager` and use that:
 
 ```java
@@ -235,11 +235,11 @@ class SecurityConfiguration {
 }
 ```
 
-So if we try our call again, `red-user` on `black.` tenant, but targeting the `/secured/todo` endpoint instead of
+So if we try our call again, `red-user` on `blue.` tenant, but targeting the `/secured/todo` endpoint instead of
 `/todo`, then our custom authorization manager kicks in, and the request is rejected:
 
 ```
-curl  http://black.127.0.0.1.nip.io:8080/secured/todo -H "Cookie: JSESSIONID=<your session id goes here>"
+curl  http://blue.127.0.0.1.nip.io:8080/secured/todo -H "Cookie: JSESSIONID=<your session id goes here>"
 
 # Response:
 # 

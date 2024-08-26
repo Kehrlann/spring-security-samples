@@ -1,9 +1,9 @@
-set search_path to "black";
+set search_path to "blue";
 truncate table todo;
-insert into todo(text) values('black one');
-insert into todo(text) values('black two');
+insert into todo(text) values('blue one');
+insert into todo(text) values('blue two');
 truncate table app_user;
-insert into app_user(username, password) values('black-user', '{bcrypt}$2y$10$gZ9FExFNPFxjTHgeVdaxEulkFkGS4QQHGROAKH4y51VY1YHmocr7e');
+insert into app_user(username, password) values('blue-user', '{bcrypt}$2y$10$gZ9FExFNPFxjTHgeVdaxEulkFkGS4QQHGROAKH4y51VY1YHmocr7e');
 
 set search_path to "red";
 truncate table todo;

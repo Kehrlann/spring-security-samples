@@ -15,7 +15,7 @@ class WelcomeController {
 		return """
 				<h1>Todo application</h1>
 				<p><a href="http://red.127.0.0.1.nip.io:%s/todo">Go to red</a></p>
-				<p><a href="http://black.127.0.0.1.nip.io:%s/todo">Go to black</a></p>
+				<p><a href="http://blue.127.0.0.1.nip.io:%s/todo">Go to blue</a></p>
 				<p><a href="/logout">Logout</a></p>
 				<h2>Some interesting curl commands:</h2>
 
@@ -24,19 +24,19 @@ class WelcomeController {
 				curl -vw "\\n" http://red.127.0.0.1.nip.io:8080/todo --user red-user:password
 				</pre>
 
-				<p>Black user on black tenant, works</p>
+				<p>Blue user on blue tenant, works</p>
 				<pre>
-				curl -vw "\\n" http://black.127.0.0.1.nip.io:8080/todo --user black-user:password
+				curl -vw "\\n" http://blue.127.0.0.1.nip.io:8080/todo --user blue-user:password
 				</pre>
 
-				<p>Red user on black tenant, fails because there is no red-user in the black schema</p>
+				<p>Red user on blue tenant, fails because there is no red-user in the blue schema</p>
 				<pre>
-				curl -vw "\\n" http://black.127.0.0.1.nip.io:8080/todo --user red-user:password
+				curl -vw "\\n" http://blue.127.0.0.1.nip.io:8080/todo --user red-user:password
 				</pre>
 
-				<p>Black user on red tenant, fails because there is no red-user in the red schema</p>
+				<p>Blue user on red tenant, fails because there is no red-user in the red schema</p>
 				<pre>
-				curl -vw "\\n" http://red.127.0.0.1.nip.io:8080/todo --user black-user:password
+				curl -vw "\\n" http://red.127.0.0.1.nip.io:8080/todo --user blue-user:password
 				</pre>
 				""".formatted(port, port);
 	}

@@ -17,7 +17,7 @@ server:
   #
   # This makes the user's session cookie available across all domains,
   # meaning you can log in on red.127.0.0.1.nip.io as red-user,
-  # and THEN navigate to black.127.0.0.1.nip.io as black-user and be logged in.
+  # and THEN navigate to blue.127.0.0.1.nip.io as blue-user and be logged in.
   #
   # If you do not set the domain, the session cookie will be restricted to the
   # subdomain your user logged in with, effectively separating sessions across sites.
