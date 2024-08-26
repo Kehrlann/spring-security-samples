@@ -41,7 +41,7 @@ class SecurityConfiguration {
 		public AuthorizationDecision check(Supplier<Authentication> authSupplier, RequestAuthorizationContext ctx) {
 			var auth = authSupplier.get();
 
-			if (trustResolver.isAuthenticated(auth)) {
+			if (!trustResolver.isAuthenticated(auth)) {
 				// Auth is null, not authenticated or anonymous
 				return new AuthorizationDecision(false);
 
