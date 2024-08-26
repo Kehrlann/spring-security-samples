@@ -50,16 +50,30 @@ public String resolveCurrentTenantIdentifier() {
 ```
 
 Our users are loaded from different schema. To know to which schema the user belongs, we use the postgres
-keyword `CURRENT_SCHEMA` and load that into a property in `User`. This will allow us to make security checks
-for logged-in users:
+keyword `CURRENT_SCHEMA` and load that into a property in our `User` model. This will allow us to make
+security checks for logged-in users:
 
 ```java
 
-@Formula("CURRENT_SCHEMA")
-private String tenantId;
+@Entity(name = "app_user")
+public class User implements UserDetails {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String password;
+
+    private String username;
+
+    @Formula("CURRENT_SCHEMA")
+    private String tenantId;
+
+    // ...
+}
 ```
 
-## Security
+## Security profile of the application
 
 There are two ways to authenticate with the application:
 
@@ -157,3 +171,165 @@ curl  http://black.127.0.0.1.nip.io:8080/todo -H "Cookie: JSESSIONID=<your sessi
 # <br><br>
 # <p><em>PSA: don't display sensitive credentials, like the session ID, on your webpage.</em></p>
 ```
+
+Users can "escape" their domain, by using a legitimate cookie. That's pretty bad.
+
+## Securing the app
+
+### Using an `AuthorizationManager`
+
+We want to block `red-user` to access the `black.` tenant, and vice-versa. If our app does not have to handle too many
+permissions per-tenant (e.g. admin role, user role, etc), the we can write an `AuthorizationManager` and use that:
+
+```java
+private static class TenantIdAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+
+    AuthenticationTrustResolverImpl trustResolver = new AuthenticationTrustResolverImpl();
+
+    @Override
+    public AuthorizationDecision check(Supplier<Authentication> authSupplier, RequestAuthorizationContext ctx) {
+        var auth = authSupplier.get();
+
+        if (!trustResolver.isAuthenticated(auth)) {
+            // Auth is null, user is not authenticated, or user is anonymous
+            // -> deny access
+            return new AuthorizationDecision(false);
+
+        }
+        if (!(auth.getPrincipal() instanceof User user)) {
+            // This should never happen as we only have one authentication type in our app
+            // In any case, we should set a secure default
+            // -> deny access
+            return new AuthorizationDecision(false);
+        }
+
+        // Check the tenantId vs the subdomain, and authorize when they match
+        var subdomain = ctx.getRequest().getServerName().split("\\.")[0];
+        var userTenant = user.getTenantId();
+
+        return new AuthorizationDecision(subdomain.equals(userTenant));
+
+    }
+}
+```
+
+This can be used in our Security configuration, just like an `.authenticated()` or `.hasRoles(...)` rule:
+
+```java
+
+@Configuration
+@EnableWebSecurity
+class SecurityConfiguration {
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http.authorizeHttpRequests(authConfig -> {
+                    authConfig.requestMatchers("/").permitAll();
+                    // The /secured/... endpoints will have tenant protection
+                    authConfig.requestMatchers("/secured/**").access(new TenantIdAuthorizationManager());
+                    authConfig.anyRequest().authenticated();
+                })
+                // ...
+                .build();
+    }
+}
+```
+
+So if we try our call again, `red-user` on `black.` tenant, but targeting the `/secured/todo` endpoint instead of
+`/todo`, then our custom authorization manager kicks in, and the request is rejected:
+
+```
+curl  http://black.127.0.0.1.nip.io:8080/secured/todo -H "Cookie: JSESSIONID=<your session id goes here>"
+
+# Response:
+# 
+# {"timestamp":"2024-08-26T08:38:23.313+00:00","status":403,"error":"Forbidden","message":"Forbidden","path":"/secured/todo"}
+```
+
+This approach works, but in practice only to be used to secure "everything":
+
+```java
+
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http.authorizeHttpRequests(authConfig -> {
+                authConfig.requestMatchers("/", "/public", "...").permitAll();
+                authConfig.anyRequest().access(new TenantIdAuthorizationManager());
+            })
+            // ...
+            .build();
+}
+```
+
+And it does easily support e.g. checking for roles.
+
+### Using a filter
+
+If you want to retain the usual fine-grained authorization in addition to tenant isolation, you could consider using a
+`Filter`, and apply it right before `AuthorizationFilter`, where authorizations (e.g, roles) are checked. This way,
+you'll ensure an `Authentication` will be available in the `SecurityContext` when applicable. Something like:
+
+```java
+class TenantVerificationFilter extends OncePerRequestFilter {
+    
+	// Used to verify the user is logged in when making this request
+	private final AuthenticationTrustResolverImpl trustResolver = new AuthenticationTrustResolverImpl();
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (!trustResolver.isAuthenticated(authentication)) {
+			// If the user is not logged in, we cannot know the tenant for which this
+			// connection is authorized, as we have no user info, and no tenant ID.
+			// Security is delegated to the rest of the filter chain, which will check
+			// whether the user needs to be authenticated to access this page.
+			// This is useful for anonymous access to a public page.
+			filterChain.doFilter(request, response);
+			return;
+		}
+
+		if (!(authentication.getPrincipal() instanceof User user)) {
+			// Should never happen, we only have the `User` type for our users.
+			throw new ServletException("This should never happen");
+		}
+
+		var subdomain = request.getServerName().split("\\.")[0];
+		if (!subdomain.equals(user.getTenantId())) {
+			var errorMessage = "Invalid tenant, trying to access [%s] but user [%s] is in tenant [%s]"
+				.formatted(subdomain, user.getUsername(), user.getTenantId());
+			System.out.println("~~~~~~~~> " + errorMessage);
+            // From org.springframework.security.access, not java.nio.file !
+            throw new AccessDeniedException(errorMessage);
+		}
+		else {
+			var successMessage = "Valid tenant, trying to access [%s], user [%s] is in tenant [%s]".formatted(subdomain,
+					user.getUsername(), user.getTenantId());
+			System.out.println("~~~~~~~~> " + successMessage);
+		}
+
+		filterChain.doFilter(request, response);
+	}
+
+}
+```
+
+And update the security configuration:
+
+```java
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http.authorizeHttpRequests(authConfig -> {
+        authConfig.requestMatchers("/").permitAll();
+        authConfig.anyRequest().authenticated();
+    })
+        .formLogin(Customizer.withDefaults())
+        .httpBasic(Customizer.withDefaults())
+        .logout(logout -> logout.logoutSuccessUrl("/"))
+        .addFilterBefore(new TenantVerificationFilter(), AuthorizationFilter.class)
+        .build();
+}
+```
+
+And voilà! Cross-tenant requests are forbidden.
