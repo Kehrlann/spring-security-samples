@@ -14,7 +14,6 @@ class MessagesController {
     @GetMapping("/")
     public Flux<Message> messages(ServerHttpRequest request) {
         System.out.println("👀 Authorization: " + request.getHeaders().get("Authorization"));
-        System.out.println("👀 X-Authorization: " + request.getHeaders().get("X-Authorization"));
         return Flux.fromStream(
                 Stream.of(
                         new Message("hello"),
@@ -26,7 +25,6 @@ class MessagesController {
     @GetMapping("/public")
     public Flux<Message> publicMessages(ServerHttpRequest request) {
         System.out.println("👀 Authorization: " + request.getHeaders().get("Authorization"));
-        System.out.println("👀 X-Authorization: " + request.getHeaders().get("X-Authorization"));
         return Flux.fromStream(
                 Stream.of(
                         new Message("hello"),

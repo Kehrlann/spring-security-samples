@@ -12,11 +12,16 @@ class CustomAuthorizationExchangeFilterFunction implements ExchangeFilterFunctio
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
 		return Mono.just(request).map(req -> {
+			// Grab the original authorization header created by Spring Security
 			var originalHeader = req.headers().getFirst("Authorization");
-			var token = originalHeader.substring("bearer ".length());
+			// Extract the token from the header
+			var token = originalHeader.toLowerCase().substring("bearer ".length());
 			return ClientRequest.from(req)
-				.header("X-Authorization", token)
+				// Remove the existing header entirely ; because calling ".header" would add an additional
+				// header value, rather than replace the existing value
 				.headers(h -> h.remove("Authorization"))
+				// Set the Authorization header to the desired value
+				.header("Authorization", token)
 				.build();
 		}).flatMap(next::exchange);
 	}

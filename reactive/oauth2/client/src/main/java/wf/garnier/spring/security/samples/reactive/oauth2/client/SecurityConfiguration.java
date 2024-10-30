@@ -52,9 +52,12 @@ class SecurityConfiguration {
 
 	@Bean
 	WebClient customHeaderWebClient(ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-		ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServerOAuth2AuthorizedClientExchangeFilterFunction(
+		ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2ClientFilterFunction = new ServerOAuth2AuthorizedClientExchangeFilterFunction(
 				authorizedClientManager);
-		return WebClient.builder().filter(oauth2Client).filter(new CustomAuthorizationExchangeFilterFunction()).build();
+		return WebClient.builder()
+			.filter(oauth2ClientFilterFunction)
+			.filter(new CustomAuthorizationExchangeFilterFunction())
+			.build();
 	}
 
 }
