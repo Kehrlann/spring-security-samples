@@ -43,14 +43,18 @@ class SecurityConfiguration {
 		return authorizedClientManager;
 	}
 
-@Bean
-WebClient webClient(ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-	ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServerOAuth2AuthorizedClientExchangeFilterFunction(
-			authorizedClientManager);
-	return WebClient.builder()
-			.filter(oauth2Client)
-//			.filter(new CustomAuthorizationExchangeFilterFunction())
-			.build();
-}
+	@Bean
+	WebClient oauth2WebClient(ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+		ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServerOAuth2AuthorizedClientExchangeFilterFunction(
+				authorizedClientManager);
+		return WebClient.builder().filter(oauth2Client).build();
+	}
+
+	@Bean
+	WebClient customHeaderWebClient(ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+		ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServerOAuth2AuthorizedClientExchangeFilterFunction(
+				authorizedClientManager);
+		return WebClient.builder().filter(oauth2Client).filter(new CustomAuthorizationExchangeFilterFunction()).build();
+	}
 
 }
