@@ -19,23 +19,24 @@ class SecurityConfiguration {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		//@formatter:off
-		return http
-				.authorizeHttpRequests(auth -> {
-					auth.requestMatchers("/", "favicon.ico", "error").permitAll();
-					auth.requestMatchers("/company/{companyId}/admin").access(
-							allOf(
-									hasCompanyMatching("companyId"),
-									hasRole("admin")
-							)
-					);
-					auth.requestMatchers("/company/{companyId}").access(hasCompanyMatching("companyId"));
-					auth.anyRequest().denyAll();
-				})
-				.formLogin(Customizer.withDefaults())
-				.logout(logout -> logout.logoutSuccessUrl("/"))
-				.build();
-		//@formatter:on
+		return http.authorizeHttpRequests(auth -> {
+			//@formatter:off
+			auth.requestMatchers("/", "favicon.ico", "error").permitAll();
+			auth.requestMatchers("/company/{companyId}/admin")
+				.access(
+						allOf(
+								hasCompanyMatching("companyId"),
+								hasRole("admin")
+						)
+				);
+			auth.requestMatchers("/company/{companyId}/**").access(hasCompanyMatching("companyId"));
+			auth.anyRequest().denyAll();
+			//@formatter:on
+		})
+			.formLogin(Customizer.withDefaults())
+			.httpBasic(Customizer.withDefaults())
+			.logout(logout -> logout.logoutSuccessUrl("/"))
+			.build();
 	}
 
 	// Here we path the path variable name into which to look for the company ;

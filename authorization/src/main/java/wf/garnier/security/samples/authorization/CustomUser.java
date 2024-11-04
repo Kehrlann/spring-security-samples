@@ -26,6 +26,11 @@ class CustomUser extends User {
 		this.company = company;
 	}
 
+	public CustomUser(CustomUser customUser) {
+		super(customUser.getUsername(), customUser.getPassword(), customUser.getAuthorities());
+		this.company = customUser.getCompany();
+	}
+
 	public Company getCompany() {
 		return company;
 	}
