@@ -20,18 +20,19 @@ class SecurityConfiguration {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.authorizeHttpRequests(auth -> {
-			//@formatter:off
-			auth.requestMatchers("/", "favicon.ico", "error").permitAll();
-			auth.requestMatchers("/company/{companyId}/admin")
-				.access(
-						allOf(
-								isInCompany(),
-								hasRole("admin")
-						)
-				);
-			auth.requestMatchers("/company/{companyId}/**").access(isInCompany());
-			auth.anyRequest().denyAll();
-			//@formatter:on
+		//@formatter:off
+		auth.requestMatchers("/", "favicon.ico", "error").permitAll();
+		auth.requestMatchers("/company/{companyId}/admin")
+			.access(
+					allOf(
+							isInCompany(),
+							hasRole("admin")
+					)
+			);
+
+		auth.requestMatchers("/company/{companyId}/**").access(isInCompany());
+		auth.anyRequest().denyAll();
+		//@formatter:on
 		})
 			.formLogin(Customizer.withDefaults())
 			.httpBasic(Customizer.withDefaults())
@@ -39,11 +40,13 @@ class SecurityConfiguration {
 			.build();
 	}
 
-	// Here we path the path variable name into which to look for the company ;
-	// but it could be hardcoded.
-	private AuthorizationManager<RequestAuthorizationContext> isInCompany() {
+	private static AuthorizationManager<RequestAuthorizationContext> isInCompany() {
 		return (authentication, requestAuthorizationContext) -> {
-			if (authentication == null || !(authentication.get().getPrincipal() instanceof CustomUser user)) {
+			if (authentication == null) {
+				return new AuthorizationDecision(false);
+			}
+
+			if (!(authentication.get().getPrincipal() instanceof CustomUser user)) {
 				return new AuthorizationDecision(false);
 			}
 
