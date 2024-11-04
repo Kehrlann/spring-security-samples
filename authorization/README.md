@@ -1,7 +1,18 @@
 # Authorization
 
-This sample showcases non-trivial authorization scenarios. In this app, users are part of a company, either `alpha` or
-`omega`. They also have roles, e.g. `user` or `admin`.
+This sample showcases non-trivial authorization scenarios.
+
+Run the project with JDK 21+:
+
+```
+./gradlew bootRun
+```
+
+
+## Description
+
+In this app, users are part of a company, either `alpha` or `omega`. They also have roles, e.g.
+`user` or `admin`.
 
 Users can only see the pages of their companies within `/company/{companyId}/**`; and only admins can see the
 `/company/{companyId}/admin` page.
