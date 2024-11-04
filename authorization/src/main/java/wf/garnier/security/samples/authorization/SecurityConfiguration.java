@@ -25,11 +25,11 @@ class SecurityConfiguration {
 			auth.requestMatchers("/company/{companyId}/admin")
 				.access(
 						allOf(
-								hasCompanyMatching("companyId"),
+								isInCompany(),
 								hasRole("admin")
 						)
 				);
-			auth.requestMatchers("/company/{companyId}/**").access(hasCompanyMatching("companyId"));
+			auth.requestMatchers("/company/{companyId}/**").access(isInCompany());
 			auth.anyRequest().denyAll();
 			//@formatter:on
 		})
@@ -41,13 +41,13 @@ class SecurityConfiguration {
 
 	// Here we path the path variable name into which to look for the company ;
 	// but it could be hardcoded.
-	private AuthorizationManager<RequestAuthorizationContext> hasCompanyMatching(String pathParameterName) {
+	private AuthorizationManager<RequestAuthorizationContext> isInCompany() {
 		return (authentication, requestAuthorizationContext) -> {
 			if (authentication == null || !(authentication.get().getPrincipal() instanceof CustomUser user)) {
 				return new AuthorizationDecision(false);
 			}
 
-			var companyId = requestAuthorizationContext.getVariables().get(pathParameterName);
+			var companyId = requestAuthorizationContext.getVariables().get("companyId");
 			return new AuthorizationDecision(user.getCompany().id().equals(companyId));
 		};
 	}
