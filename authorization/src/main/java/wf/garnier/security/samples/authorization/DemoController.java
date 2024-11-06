@@ -51,7 +51,7 @@ class DemoController {
 		var company = companyRepository.findById(companyId);
 		return """
 				<h1>%s</h1>
-				<p>Here is the company details for %s.</p>
+				<p>Here are the company details for %s.</p>
 				<p><a href="/company/%s/admin">Admin page</a></p>
 				<p><a href="/">Home</a></p>
 				""".formatted(company.name(), company.name(), companyId);
