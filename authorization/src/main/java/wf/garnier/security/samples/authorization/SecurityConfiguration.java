@@ -20,19 +20,18 @@ class SecurityConfiguration {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.authorizeHttpRequests(auth -> {
-		//@formatter:off
-		auth.requestMatchers("/", "favicon.ico", "error").permitAll();
-		auth.requestMatchers("/company/{companyId}/admin")
-			.access(
-					allOf(
-							isInCompany(),
-							hasRole("admin")
-					)
-			);
-
-		auth.requestMatchers("/company/{companyId}/**").access(isInCompany());
-		auth.anyRequest().denyAll();
-		//@formatter:on
+			auth.requestMatchers("/", "favicon.ico", "error").permitAll();
+			//@formatter:off
+			auth.requestMatchers("/company/{companyId}/admin")
+					.access(
+							allOf(
+									isInCompany(),
+									hasRole("admin")
+							)
+					);
+			//@formatter:on
+			auth.requestMatchers("/company/{companyId}/**").access(isInCompany());
+			auth.anyRequest().denyAll();
 		})
 			.formLogin(Customizer.withDefaults())
 			.httpBasic(Customizer.withDefaults())
