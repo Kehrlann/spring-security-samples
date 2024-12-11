@@ -1,0 +1,100 @@
+name: spring-security-nginx
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "9000:9000"
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+
+  local-auth-server:
+    image: openjdk:21
+    volumes:
+      - ./tanzu-local-authorization-server:/app
+    working_dir: /app
+    command:
+      - java
+      - -jar
+      - tanzu-local-authorization-server-1.0.0.jar
+    depends_on:
+      - web
+    network_mode: service:web
+
+  alpha:
+    image: gradle:8.11.1-jdk21
+    environment:
+      SERVER_PORT: 8081
+      SERVER_SERVLET_CONTEXT_PATH: "/alpha"
+    volumes:
+      - .:/app
+    working_dir: /app
+    command:
+      - gradle
+      - bootRun
+    depends_on:
+      - local-auth-server
+      - web
+    network_mode: service:web
+
+  beta:
+    image: gradle:8.11.1-jdk21
+    environment:
+      SERVER_PORT: 8082
+      SERVER_SERVLET_CONTEXT_PATH: "/beta"
+    volumes:
+      - .:/app
+    working_dir: /app
+    command:
+      - gradle
+      - bootRun
+    depends_on:
+      - local-auth-server
+      - web
+    network_mode: service:web
+
+configs:
+  nginx_config:
+    content: |
+      user  nginx;
+      worker_processes  auto;
+      
+      error_log  /var/log/nginx/error.log notice;
+      pid        /var/run/nginx.pid;
+      
+      
+      events {
+        worker_connections  1024;
+      }
+      
+      http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+      
+        log_format  main  '$$remote_addr - $$remote_user [$$time_local] "$$request" '
+        '$$status $$body_bytes_sent "$$http_referer" '
+        '"$$http_user_agent" "$$http_x_forwarded_for"';
+      
+        access_log  /var/log/nginx/access.log  main;
+      
+
+        server { 
+          listen 8080;
+          server_name _;  # Replace with your domain or use _ for default
+  
+          proxy_set_header X-Forwarded-For $$remote_addr;
+          proxy_set_header X-Forwarded-Proto $$scheme;
+          proxy_set_header X-Forwarded-Port $$server_port;
+      
+          location /alpha {
+            proxy_pass http://127.0.0.1:8081;
+          }
+      
+          location /beta {
+            proxy_pass http://127.0.0.1:8082;
+          }
+        }        
+      }
