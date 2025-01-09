@@ -6,23 +6,10 @@ services:
     ports:
       - "8080:8080"
       - "8081:8081"
-      - "9000:9000"
+      - "5556:5556"
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
-
-  local-auth-server:
-    image: openjdk:21
-    volumes:
-      - ./tanzu-local-authorization-server:/app
-    working_dir: /app
-    command:
-      - java
-      - -jar
-      - tanzu-local-authorization-server-1.0.0.jar
-    depends_on:
-      - web
-    network_mode: service:web
 
   alpha:
     image: gradle:8.11.1-jdk21
@@ -36,9 +23,14 @@ services:
       - gradle
       - bootRun
     depends_on:
-      - local-auth-server
+      - dex
       - web
     network_mode: service:web
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8081/alpha" ]
+      interval: 10s
+      timeout: 1s
+      retries: 12
 
   beta:
     image: gradle:8.11.1-jdk21
@@ -52,8 +44,27 @@ services:
       - gradle
       - bootRun
     depends_on:
-      - local-auth-server
+      - dex
       - web
+    network_mode: service:web
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8082/beta" ]
+      interval: 10s
+      timeout: 1s
+      retries: 12
+
+
+  dex:
+    image: "dexidp/dex:v2.37.0"
+    deploy:
+      replicas: 1
+    configs:
+      - source: dex_config
+        target: /opt/config/dex.yml
+    command:
+      - dex
+      - serve
+      - /opt/config/dex.yml
     network_mode: service:web
 
 configs:
@@ -98,3 +109,29 @@ configs:
           }
         }        
       }
+  dex_config:
+    content: |
+      issuer: "http://localhost:5556"
+      storage:
+        type: sqlite3
+        config:
+          file: /etc/dex/dex.db
+      web:
+        http: 0.0.0.0:5556
+      staticClients:
+        - id: dex-client-id
+          redirectURIs:
+            - "http://localhost:8080/login/oauth2/code/dex"
+            - "http://127.0.0.1:8080/alpha/login/oauth2/code/dex"
+            - "http://127.0.0.1:8080/beta/login/oauth2/code/dex"
+          name: 'Base application'
+          secret: dex-client-secret
+          grant_types:
+            - authorization_code
+            - client_credentials
+      enablePasswordDB: true
+      staticPasswords:
+        - email: "user@example.com"
+          hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W" # "password"
+          username: "user"
+          userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"

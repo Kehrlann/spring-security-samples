@@ -19,17 +19,17 @@ spring:
     oauth2:
       client:
         registration:
-          tanzu-local-authorization-server:
-            client-id: default-client-id
-            client-secret: default-client-secret
-            client-name: Tanzu Local Authorization Server
+          dex:
+            client-id: dex-client-id
+            client-secret: dex-client-secret
+            client-name: Dex
             scope:
               - openid
               - email
               - profile
         provider:
-          tanzu-local-authorization-server:
-            issuer-uri: http://localhost:9000
+          dex:
+            issuer-uri: http://localhost:5556
 logging:
   level:
     org.springframework.security: DEBUG

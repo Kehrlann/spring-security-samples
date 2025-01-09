@@ -16,7 +16,8 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,9 +62,9 @@ public class SubpathApplication {
 @RestController
 class DemoController {
     @GetMapping("/")
-    public String hello(Authentication auth) {
+    public String hello(@AuthenticationPrincipal OidcUser user) {
         return """
                 <h1>Hello %s!</h1>
-                """.formatted(auth.getName());
+                """.formatted(user.getEmail());
     }
 }
