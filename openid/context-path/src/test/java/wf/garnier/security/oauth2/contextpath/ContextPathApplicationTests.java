@@ -1,10 +1,10 @@
-package wf.garnier.security.oauth2.subpath;
+package wf.garnier.security.oauth2.contextpath;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SubpathApplicationTests {
+class ContextPathApplicationTests {
 
 	@Test
 	void contextLoads() {

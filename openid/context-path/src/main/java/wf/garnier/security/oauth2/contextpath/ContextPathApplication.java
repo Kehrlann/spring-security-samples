@@ -1,4 +1,4 @@
-package wf.garnier.security.oauth2.subpath;
+package wf.garnier.security.oauth2.contextpath;
 
 
 import java.io.IOException;
@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-public class SubpathApplication {
+public class ContextPathApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SubpathApplication.class, args);
+        SpringApplication.run(ContextPathApplication.class, args);
     }
 
     @Bean
