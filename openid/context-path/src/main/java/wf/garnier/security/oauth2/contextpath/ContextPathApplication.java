@@ -4,6 +4,7 @@ package wf.garnier.security.oauth2.contextpath;
 import java.io.IOException;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -62,9 +63,10 @@ public class ContextPathApplication {
 @RestController
 class DemoController {
     @GetMapping("/")
-    public String hello(@AuthenticationPrincipal OidcUser user) {
+    public String hello(@AuthenticationPrincipal OidcUser user, HttpServletRequest request) {
         return """
                 <h1>Hello %s!</h1>
-                """.formatted(user.getEmail());
+                <p>You are on URL=[%s], where context-path=[%s].<p>
+                """.formatted(user.getEmail(), request.getRequestURL(), request.getContextPath());
     }
 }
