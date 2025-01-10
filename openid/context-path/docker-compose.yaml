@@ -1,4 +1,4 @@
-name: spring-security-nginx
+name: spring-security-context-path
 
 services:
   web:
