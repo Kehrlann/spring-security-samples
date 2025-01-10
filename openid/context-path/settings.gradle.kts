@@ -1,1 +1,1 @@
-rootProject.name = "subpath"
+rootProject.name = "context-path"
