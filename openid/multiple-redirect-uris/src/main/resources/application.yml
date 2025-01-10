@@ -1,0 +1,47 @@
+server:
+  forward-headers-strategy: native
+  port: 8082
+  servlet:
+    context-path: "/"
+  tomcat:
+    remoteip:
+      internal-proxies: 10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|100\.6[4-9]{1}\.\d{1,3}\.\d{1,3}|100\.[7-9]{1}\d{1}\.\d{1,3}\.\d{1,3}|100\.1[0-1]{1}\d{1}\.\d{1,3}\.\d{1,3}|100\.12[0-7]{1}\.\d{1,3}\.\d{1,3}|172\.1[6-9]{1}\.\d{1,3}\.\d{1,3}|172\.2[0-9]{1}\.\d{1,3}\.\d{1,3}|172\.3[0-1]{1}\.\d{1,3}\.\d{1,3}
+#  tomcat:
+#    accesslog:
+#      enabled: true
+#      directory: /dev
+#      prefix: stdout
+#      buffered: false
+#      suffix:
+#      file-date-format:
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          alpha:
+            client-id: dex-client-id
+            client-secret: dex-client-secret
+            client-name: Dex alpha
+            scope:
+              - openid
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/alpha/authorized"
+            provider: dex
+          beta:
+            client-id: dex-client-id
+            client-secret: dex-client-secret
+            client-name: Dex beta
+            scope:
+              - openid
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/beta/authorized"
+            provider: dex
+        provider:
+          dex:
+            issuer-uri: http://localhost:5556
+logging:
+  level:
+    org.springframework.security: DEBUG

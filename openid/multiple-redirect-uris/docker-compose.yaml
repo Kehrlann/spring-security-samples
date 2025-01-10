@@ -1,0 +1,116 @@
+name: spring-security-multiple-redirect-uris
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "5556:5556"
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+
+  app:
+    image: gradle:8.11.1-jdk21
+    environment:
+      SERVER_PORT: 8081
+    volumes:
+      - .:/app
+    working_dir: /app
+    command:
+      - gradle
+      - bootRun
+    depends_on:
+      - dex
+      - web
+    network_mode: service:web
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8081/" ]
+      interval: 10s
+      timeout: 1s
+      retries: 12
+
+  dex:
+    image: "dexidp/dex:v2.37.0"
+    deploy:
+      replicas: 1
+    configs:
+      - source: dex_config
+        target: /opt/config/dex.yml
+    command:
+      - dex
+      - serve
+      - /opt/config/dex.yml
+    network_mode: service:web
+
+configs:
+  nginx_config:
+    content: |
+      user  nginx;
+      worker_processes  auto;
+      
+      error_log  /var/log/nginx/error.log notice;
+      pid        /var/run/nginx.pid;
+      
+      
+      events {
+        worker_connections  1024;
+      }
+      
+      http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+      
+        log_format  main  '$$remote_addr - $$remote_user [$$time_local] "$$request" '
+        '$$status $$body_bytes_sent "$$http_referer" '
+        '"$$http_user_agent" "$$http_x_forwarded_for"';
+      
+        access_log  /var/log/nginx/access.log  main;
+      
+
+        server { 
+          listen 8080;
+          server_name _;  # Replace with your domain or use _ for default
+  
+          proxy_set_header X-Forwarded-For $$remote_addr;
+          proxy_set_header X-Forwarded-Proto $$scheme;
+          proxy_set_header X-Forwarded-Port $$server_port;
+      
+          location /alpha {
+            proxy_pass http://127.0.0.1:8081;
+          }
+      
+          location /beta {
+            proxy_pass http://127.0.0.1:8081;
+          }
+
+        }        
+      }
+  dex_config:
+    content: |
+      issuer: "http://localhost:5556"
+      storage:
+        type: sqlite3
+        config:
+          file: /etc/dex/dex.db
+      web:
+        http: 0.0.0.0:5556
+      staticClients:
+        - id: dex-client-id
+          redirectURIs:
+            - "http://127.0.0.1:8080/alpha/authorized"
+            - "http://127.0.0.1:8080/beta/authorized"
+            - "http://localhost:8082/alpha/authorized"
+            - "http://localhost:8082/beta/authorized"
+          name: 'Base application'
+          secret: dex-client-secret
+          grant_types:
+            - authorization_code
+            - client_credentials
+      enablePasswordDB: true
+      staticPasswords:
+        - email: "user@example.com"
+          hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W" # "password"
+          username: "user"
+          userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
