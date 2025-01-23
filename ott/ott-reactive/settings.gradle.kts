@@ -1,1 +1,1 @@
-rootProject.name = "ott"
+rootProject.name = "ott-reactive"
