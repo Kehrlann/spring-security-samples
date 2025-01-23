@@ -1,1 +1,1 @@
-rootProject.name = "servlet"
+rootProject.name = "ott-servlet"
