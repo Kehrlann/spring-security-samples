@@ -31,8 +31,12 @@ public class OttApplication {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             return http
-                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                    .formLogin(Customizer.withDefaults())
+                    .authorizeHttpRequests(auth -> {
+                        auth.requestMatchers("favicon.ico").permitAll();
+                        auth.anyRequest().authenticated();
+                    })
+                    // Required pre Spring Security 6.5.0 / Spring Boot 3.5.0
+//                    .formLogin(Customizer.withDefaults())
                     .oneTimeTokenLogin(ott -> {
                         ott.tokenGenerationSuccessHandler((req, res, token) -> {
                             var value = token.getTokenValue();
