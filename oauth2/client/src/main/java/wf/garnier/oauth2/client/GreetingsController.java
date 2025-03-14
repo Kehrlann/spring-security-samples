@@ -1,9 +1,10 @@
 package wf.garnier.oauth2.client;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -20,8 +21,8 @@ class GreetingsController {
 
     private final RestClient restClient;
 
-    public GreetingsController(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.build();
+    public GreetingsController(RestClient.Builder restClientBuilder, @Value("${conference.url}") String resourceServerUrl) {
+        this.restClient = restClientBuilder.baseUrl(resourceServerUrl).build();
     }
 
     @GetMapping("/")
@@ -46,7 +47,7 @@ class GreetingsController {
         var token = authorizedClient.getAccessToken();
 
         var conferences = this.restClient.get()
-                .uri("http://localhost:8081/conferences")
+                .uri("/conferences")
                 .header("Authorization", "Bearer " + token.getTokenValue())
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<Conference>>() {
@@ -69,7 +70,7 @@ class GreetingsController {
         var token = authorizedClient.getAccessToken();
 
         var conferences = this.restClient.get()
-                .uri("http://localhost:8081/conferences/admin")
+                .uri("/conferences/admin")
                 .header("Authorization", "Bearer " + token.getTokenValue())
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<Conference>>() {

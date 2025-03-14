@@ -35,3 +35,5 @@ server:
   servlet:
     session:
       persistent: true
+conference:
+  url: "http://localhost:8081"
