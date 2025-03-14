@@ -1,2 +1,2 @@
 rootProject.name = "oauth2"
-include("client", "resource-server", "authorization-server")
+include("client", "resource-server", "authorization-server", "resourceauth")
