@@ -20,6 +20,7 @@ spring:
                 - "client_secret_basic"
               authorization-grant-types:
                 - "authorization_code"
+                - "client_credentials"
               redirect-uris:
                 - "http://localhost:8080/login/oauth2/code/spring-auth-server"
                 - "http://localhost:8080/authorize/oauth2/code/spring-auth-server"
