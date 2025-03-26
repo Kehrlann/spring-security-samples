@@ -1,0 +1,23 @@
+spring:
+  thymeleaf:
+    cache: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          spring-auth-server:
+            client-id: "oidc-client"
+            client-secret: "secret"
+            authorization-grant-type: client_credentials
+            client-name: Spring Authorization Server
+            scope:
+              - openid
+              - email
+              - conference.list
+        provider:
+          spring-auth-server:
+            issuer-uri: "http://localhost:8083"
+
+conference:
+  url: "http://localhost:8081"
