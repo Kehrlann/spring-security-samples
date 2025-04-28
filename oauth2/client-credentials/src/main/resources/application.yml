@@ -18,6 +18,8 @@ spring:
         provider:
           spring-auth-server:
             issuer-uri: "http://localhost:8083"
+  main:
+    web-application-type: none
 
 conference:
   url: "http://localhost:8081"
