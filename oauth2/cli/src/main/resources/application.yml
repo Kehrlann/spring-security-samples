@@ -1,0 +1,25 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          spring-auth-server-client-credentials:
+            client-id: "oidc-client"
+            client-secret: "secret"
+            authorization-grant-type: "client_credentials"
+            provider: spring-auth-server
+          spring-auth-server-device-code:
+            client-id: "oidc-client"
+            client-secret: "secret"
+            authorization-grant-type: "urn:ietf:params:oauth:grant-type:device_code"
+            provider: spring-auth-server
+            scope:
+              - "device"
+        provider:
+          spring-auth-server:
+            issuer-uri: "http://localhost:8083"
+  main:
+    web-application-type: none
+  shell:
+    interactive:
+      enabled: true

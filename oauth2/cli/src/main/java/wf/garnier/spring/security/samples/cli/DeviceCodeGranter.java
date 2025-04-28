@@ -1,7 +1,6 @@
-package wf.garnier.spring.security.samples.cli.authorization;
+package wf.garnier.spring.security.samples.cli;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.Duration;
@@ -9,7 +8,6 @@ import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -21,15 +19,13 @@ import org.springframework.web.client.RestClient;
 @Component
 public class DeviceCodeGranter {
 
-    private final ObjectMapper objectMapper;
     private final ClientRegistration clientRegistration;
     private final RestClient restClient;
 
-    public DeviceCodeGranter(InMemoryClientRegistrationRepository clientRegistrationRepository, RestClient.Builder restClientBuilder, Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder) {
+    public DeviceCodeGranter(InMemoryClientRegistrationRepository clientRegistrationRepository, RestClient.Builder restClientBuilder) {
         // TODO: public client support
         this.clientRegistration = clientRegistrationRepository.findByRegistrationId("spring-auth-server-device-code");
         this.restClient = restClientBuilder.build();
-        this.objectMapper = jackson2ObjectMapperBuilder.build();
     }
 
     public DeviceCodeRequest authorize() {
