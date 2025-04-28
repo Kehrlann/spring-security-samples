@@ -1,8 +1,6 @@
 package wf.garnier.oauth2.authorizationserver;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import org.springframework.boot.SpringApplication;
@@ -27,7 +25,8 @@ public class AuthorizationServerApplication {
         var b = User.withDefaultPasswordEncoder();
         return new InMemoryUserDetailsManager(
                 b.username("okta@garnier.wf").password("password").roles("user", "admin").build(),
-                b.username("admin@example.org").password("password").roles("user").build()
+                b.username("admin@example.org").password("password").roles("user").build(),
+                b.username("user").password("password").roles("user").build()
         );
     }
 
@@ -35,7 +34,7 @@ public class AuthorizationServerApplication {
     OAuth2TokenCustomizer<JwtEncodingContext> customizer() {
         return context -> {
             if (!context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
-                return ;
+                return;
             }
             if (context.getPrincipal().getName().equals("admin@example.org")) {
                 context.getClaims().claims(scopes -> {
