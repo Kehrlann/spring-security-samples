@@ -116,6 +116,7 @@ class SecurityConfiguration {
         var b = User.withDefaultPasswordEncoder();
         return new InMemoryUserDetailsManager(
                 b.username("okta@garnier.wf").password("password").roles("user", "admin").build(),
+                b.username("user").password("password").roles("user", "admin").build(),
                 b.username("admin@example.org").password("password").roles("user").build()
         );
     }
