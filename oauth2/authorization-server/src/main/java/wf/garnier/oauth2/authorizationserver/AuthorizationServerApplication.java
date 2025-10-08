@@ -32,6 +32,7 @@ public class AuthorizationServerApplication {
 
     @Bean
     OAuth2TokenCustomizer<JwtEncodingContext> customizer() {
+
         return context -> {
             if (!context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
                 return;

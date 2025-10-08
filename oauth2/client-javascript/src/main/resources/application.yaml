@@ -1,0 +1,18 @@
+server:
+  port: 8084
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          spring-auth-server:
+            client-id: oidc-client
+            client-secret: secret
+            scope:
+              - openid
+              - email
+              - profile
+        provider:
+          spring-auth-server:
+            issuer-uri: http://localhost:9000

@@ -17,7 +17,7 @@ spring:
               - conference.list
         provider:
           spring-auth-server:
-            issuer-uri: "http://localhost:8083"
+            issuer-uri: "http://localhost:9000"
   main:
     web-application-type: none
 

@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 9000
   servlet:
     session:
       cookie:
@@ -21,6 +21,7 @@ spring:
                 - "urn:ietf:params:oauth:grant-type:device_code"
               redirect-uris:
                 - "http://localhost:8080/login/oauth2/code/spring-auth-server"
+                - "http://localhost:8084/login/oauth2/code/spring-auth-server"
                 - "http://localhost:8080/authorize/oauth2/code/spring-auth-server"
               scopes:
                 - "openid"
